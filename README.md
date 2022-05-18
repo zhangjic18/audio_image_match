@@ -18,18 +18,18 @@
 
 ## 2 方法简介
 
-### 1.0 数据预处理
+### 2.0 数据预处理
 
 1. 对于音频，将每个`audio_data.pkl`处理为4\*64\*256的`melspectrogram feature`和4\*64\*256的`mfcc feature`，将二者分别归一化后再`cat`在一起，最终得到一个8\*64\*256的`tensor`
 2. 对于图像，首先对RGB图像进行裁剪，左右各裁去100个像素，上下各裁去20个像素，得到的图像尺寸为440*440，再利用掩膜将RGB图像的背景置为0，然后将序列`cat`在一起，得到60\*440\*440的`tensor`，最后，对`tensor`进行归一化
 3. 构建音频分类的训练集、验证集、测试集
 4. 构建图像分类的训练集、验证集、测试集
 
-### 1.1 音频分类
+### 2.1 音频分类
 
 ​		将每个`audio_data.pkl`处理为4\*64\*256的`melspectrogram feature`和4\*64\*256的`mfcc feature`，将二者分别归一化后再`cat`在一起，最终得到一个8\*64\*256的`tensor`，再利用`resnet18`进行分类。
 
-### 1.2 完全匹配
+### 2.2 完全匹配
 
 1. 利用`resnet18__to_audio_classify.pth`提取音频特征
 2. 利用`resnet18__to_image_classify.pth`提取图像序列特征
@@ -37,20 +37,34 @@
 3. 总共20次`episode`，每次`episode`中，从原始数据集中构建数量均衡的匹配网络训练数据集，训练二分类匹配网络
 3. 模型训练结束后，再采用匈牙利算法做完全匹配
 
-### 1.3 不完全匹配
+### 2.3 不完全匹配
 
-
-
-
+​		基本思路同完全匹配，因为匈牙利算法可以解决“工人”与“任务”数量不一致的问题，即`similarity`矩阵不是方阵的问题。
 
 ## 3 项目结构
 
+
+* `src`：源代码
+  * `dataset`：包含各种构建数据集的`.py`文件
+  * `model`：包含各种`.py`模型文件
+  * `preprocess.py`：预处理
+  * `image_classify.py`：图像序列分类
+  * `audio_classify.py`：音频分类
+  * `match_net_train.py`：匹配网络训练
+  * `task_1.py`：完成任务1
+  * `task_2.py`：完成任务2
+  * `task_3.py`：完成任务3
+  * `test.py`：完成助教要求的`test`函数
+  * `utils.py`：工具类：`AverageMeter`
 * `data`：
   * `original_data`
   * `processed_data`
-* `src`：
-
-
+  * `image`
+  * `audio`
+* `checkpoints`
+* `doc`
+* `README.md`
+* `requirements.txt`
 
 ## 4 实验效果
 

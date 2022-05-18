@@ -5,27 +5,19 @@ import torch.nn as nn
 class my_model(nn.Module):
     def __init__(self):
         super().__init__()
-        self.feature = nn.Sequential(nn.Conv2d(4, 64, kernel_size=(3, 3), stride=(1, 2), padding=1),
+        self.feature = nn.Sequential(nn.Conv2d(60, 64, kernel_size=(3, 3), stride=(1, 2), padding=1),
                                      nn.BatchNorm2d(64),
                                      nn.ReLU(inplace=True),
-                                     nn.MaxPool2d((2, 2)),  # 64 * 64
+                                     nn.MaxPool2d((1, 2)),  # 64 * 64
 
-                                     nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
-                                     nn.BatchNorm2d(64),
-                                     nn.ReLU(inplace=True),
-                                     nn.MaxPool2d((2, 2)),  # 32 * 32
+                                     nn.AdaptiveAvgPool2d((64, 64)),
 
-                                     nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
+                                     nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=1),
                                      nn.BatchNorm2d(64),
                                      nn.ReLU(inplace=True),
                                      nn.MaxPool2d((2, 2)),  # 16 * 16
 
-                                     nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
-                                     nn.BatchNorm2d(64),
-                                     nn.ReLU(inplace=True),
-                                     nn.MaxPool2d((2, 2)),  # 8 * 8
-
-                                     nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
+                                     nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=1),
                                      nn.BatchNorm2d(64),
                                      nn.ReLU(inplace=True),
                                      nn.MaxPool2d((2, 2)),  # 4 * 4

@@ -13,11 +13,12 @@ from utils import AverageMeter
 
 
 def main(args):
-    model = match_net()
-
     device = torch.device("cuda:" + args.device[0] if torch.cuda.is_available() else "cpu")
+    model = match_net(device)
+
     if len(args.device) > 1:  # 指定多块GPU进行训练
         model = nn.DataParallel(model, device_ids=[int(item) for item in args.device.split(",")])
+
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
@@ -27,8 +28,7 @@ def main(args):
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     if args.scheduler == "MultiStepLR":
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=list(range(40, args.epoch, 40)),
-                                                         gamma=0.1)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 15], gamma=0.1)
     else:
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=15)
 
@@ -49,17 +49,16 @@ def main(args):
         test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
 
         # 1个episode，1次train与1次test
-        train(args, model, train_dataloader, val_dataloader, device, criterion, optimizer, scheduler)
+        train(i, args, model, train_dataloader, val_dataloader, device, criterion, optimizer, scheduler)
 
         test_accuracy = test(model, test_dataloader, device)
 
-        print(
-            "========================================" + args.episode + ":test========================================")
+        print("====================================episode " + str(i) + ":test====================================")
         print("test_accuracy: {:.6f}".format(test_accuracy))
 
 
-def train(args, model, train_dataloader, val_dataloader, device, criterion, optimizer, scheduler):
-    print("========================================" + args.episode + ":train========================================")
+def train(i, args, model, train_dataloader, val_dataloader, device, criterion, optimizer, scheduler):
+    print("====================================episode " + str(i) + ":train====================================")
     model.train()
 
     epoch_loss = AverageMeter()
@@ -104,11 +103,11 @@ def train(args, model, train_dataloader, val_dataloader, device, criterion, opti
         print("epoch: {}/{}, loss: {:.6f}, train accuracy: {:.6f}, val accuracy: {:.6f}, lr: {:.6f}".format(
             epoch, args.epoch, epoch_loss.avg, correct / total, val_accuracy, optimizer.param_groups[0]['lr']))
 
-        if epoch - best_val_epoch >= 40:
+        if epoch - best_val_epoch >= 7:
             print("stop training early at epoch ", epoch)
             break
 
-    print("========================================" + args.episode + ":best val========================================")
+    print("====================================episode " + str(i) + ":best val====================================")
     print("best_val_epoch: {}, best_val_accuracy: {:.6f}".format(best_val_epoch, best_val_accuracy))
 
 
@@ -133,12 +132,12 @@ def test(model, test_dataloader, device):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="match net train")
-    parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--episode", type=int, default=20)
-    parser.add_argument("--epoch", type=int, default=150)
+    parser.add_argument("--lr", type=float, default=1e-5)
+    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--episode", type=int, default=10)
+    parser.add_argument("--epoch", type=int, default=20)
     parser.add_argument("--optimizer", type=str, default="SGDm")
-    parser.add_argument("--scheduler", type=str, default="ReduceLROnPlateau")
+    parser.add_argument("--scheduler", type=str, default="MultiStepLR")
     parser.add_argument("--device", type=str, default="6")
 
     args = parser.parse_args()

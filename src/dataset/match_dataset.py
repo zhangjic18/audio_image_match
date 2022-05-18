@@ -16,7 +16,7 @@ class match_dataset(Dataset):
             parent = os.path.join(project_dir, "data", "processed_data", class_name)
 
             image_path_list = [os.path.join(parent, item) for item in os.listdir(parent) if "image" in item]
-            audio_path_list = [os.path.join(parent, item.replace("image", "audio")) for item in image_path_list]
+            audio_path_list = [os.path.join(parent, item.split("/")[-1].replace("image", "audio")) for item in image_path_list]
 
             self.match_total_list += list(zip(image_path_list, audio_path_list))
             self.label_total_list += [0] * len(image_path_list)

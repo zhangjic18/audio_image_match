@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 
 from model.from_torch.resnet import *
 from model.from_torch.vgg import *
+from model.my_model import my_model
 
 from dataset.image_classify_dataset import image_classify_dataset
 from utils import AverageMeter
@@ -24,6 +25,8 @@ def main(args):
         model = vgg11_bn(num_classes=10, in_channels=60, initial_stride=(4, 4))
     elif args.model == "vgg19_bn":
         model = vgg19_bn(num_classes=10, in_channels=60, initial_stride=(4, 4))
+    elif args.model == "my_model":
+        model = my_model()
 
     device = torch.device("cuda:" + args.device[0] if torch.cuda.is_available() else "cpu")
     if len(args.device) > 1:  # 指定多块GPU进行训练
@@ -118,7 +121,7 @@ def test(model, test_dataloader, device):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="image classify")
-    parser.add_argument("--model", type=str, default="resnet18")
+    parser.add_argument("--model", type=str, default="my_model")
     parser.add_argument("--lr", type=float, default=0.0001)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--epoch", type=int, default=30)
